@@ -1,0 +1,12 @@
+---
+title: "Cervical Cancer"
+author: "Krissa Joy Tabornal & Jan Ira Villacarlos"
+date: "6/1/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
