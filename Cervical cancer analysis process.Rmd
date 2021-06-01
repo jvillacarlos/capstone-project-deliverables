@@ -1,0 +1,107 @@
+---
+title: "Cervical Cancer Analysis (Process)"
+author: "Krissa Joy L. Tabornal and Jan Ira Villacarlos"
+date: "6/1/2021"
+output: pdf_document
+---
+```{r}
+#packages
+library(tidyverse)
+
+```
+
+1. Checking data set structure
+```{r}
+# importing data set
+cervical_cancer <- read_csv("kag_risk_factors_cervical_cancer.csv")
+
+# checking data set
+head(cervical_cancer)
+names(cervical_cancer)
+str(cervical_cancer)
+
+```
+2. Tidying the dataset
+```{r}
+#change class of data 
+#change to integer
+cervical_cancer[, c(2,3,4,5,8,10,12:26)] <- apply(cervical_cancer[, c(2,3,4,5,8,10,12:26)],
+                                                  2, function(x) as.integer(x))
+#change to numeric 
+cervical_cancer[, c(6,7,9,11,27,28)] <- apply(cervical_cancer[, c(6,7,9,11,27,28)], 2, 
+                                              function(x) as.numeric(x))
+#check new class
+str(cervical_cancer)
+
+#round off numbers to nearest whole number
+cervical_cancer %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  mutate_if(is.integer, round)
+  
+```
+3. Make interesting groupings or summaries
+```{r}
+#group by age, cancer
+cervical_cancer %>%
+  select(Age,`Dx:Cancer`) %>%
+  filter(`Dx:Cancer` == 1) %>%
+  group_by(Age) %>%
+  summarise(count = n())
+
+#group by smoke, cancer
+cervical_cancer %>%
+  select(Smokes,`Dx:Cancer`) %>%
+  filter(`Dx:Cancer` == 1) %>%
+  group_by(Smokes) %>%
+  summarise(count = n())
+
+#group by number of sexual partners, cancer
+cervical_cancer %>%
+  select(`Number of sexual partners`,`Dx:Cancer`) %>%
+  filter(`Dx:Cancer` == 1) %>%
+  group_by(`Number of sexual partners`) %>%
+  summarise(count = n())
+
+#group by number of pregnancies, cancer
+cervical_cancer %>%
+  select(`Num of pregnancies`,`Dx:Cancer`) %>%
+  filter(`Dx:Cancer` == 1) %>%
+  group_by(`Num of pregnancies`) %>%
+  summarise(count = n())
+
+#group by hormonal contraceptives, cancer
+cervical_cancer %>%
+  select(`Hormonal Contraceptives`,`Dx:Cancer`) %>%
+  filter(`Dx:Cancer` == 1) %>%
+  group_by(`Hormonal Contraceptives`) %>%
+  summarise(count = n())
+
+#group by IUD, cancer
+cervical_cancer %>%
+  select(`IUD`,`Dx:Cancer`) %>%
+  filter(`Dx:Cancer` == 1) %>%
+  group_by(`IUD`) %>%
+  summarise(count = n())
+
+#group by STD, cancer
+cervical_cancer %>%
+  select(`STDs (number)`,`Dx:Cancer`) %>%
+  filter(`Dx:Cancer` == 1) %>%
+  group_by(`STDs (number)`) %>%
+  summarise(count = n())
+
+#group by std and sexual partners
+cervical_cancer %>%
+  select(`STDs (number)`,`Number of sexual partners`) %>%
+  group_by(`Number of sexual partners`, `STDs (number)`) %>%
+  summarise(count = n())
+
+
+
+```
+4. Make interesting graphs
+```{r}
+
+```
+
+
