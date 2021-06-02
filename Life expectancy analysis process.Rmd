@@ -1,0 +1,116 @@
+---
+title: "Life Expectancy Analysis (Process)"
+author: "Krissa Joy L. Tabornal and Jan Ira Villacarlos"
+date: "6/1/2021"
+output: pdf_document
+---
+```{r}
+#packages
+library(tidyverse)
+
+```
+
+1. Checking data set structure
+```{r}
+# importing data set
+life_expectancy <- read_csv("C:/Users/user/Desktop/BIO 188 CLASS/capstone-project-deliverables/Life Expectancy Data.csv")
+
+# checking data set
+head(life_expectancy)
+names(life_expectancy)
+str(life_expectancy)
+glimpse(life_expectancy)
+
+```
+
+2. Tidying the dataset
+```{r}
+
+#round off numbers 
+life_expectancy$`percentage expenditure` <- round(life_expectancy$`percentage expenditure`, digits = 3)
+life_expectancy$GDP <- round(life_expectancy$GDP, digits = 3)
+
+#inspect the years with data
+unique(life_expectancy$Year)
+
+#count how many countries have data for each year
+life_expectancy %>%
+  group_by(Year) %>%
+  summarise(count = n())
+
+#count how many unique countries
+unique(life_expectancy$Country)
+
+#inspect NA values
+which(is.na(life_expectancy), arr.ind = TRUE) #find the indices
+apply(is.na(life_expectancy), 2, which) #find the columns 
+
+#make a separate dataframe without NA and see how it affects analysis
+life_complete <- life_expectancy %>%
+                    drop_na()
+life_complete %>%
+  group_by(Year) %>%
+  summarise(count = n()) #discrepancies in year due to removed NA
+
+unique(life_complete$Country) #removed 33 countries 
+
+#remove the 0.000 
+```
+
+3. Make interesting groupings or summaries
+```{r}
+#per year arrangement (maybe look at for every 3 years change)
+
+life_3yr <- life_expectancy %>%
+              filter(Year == c(2000, 2003, 2006, 2009, 2012, 2015))
+
+#compare life expectancy of developing vs developed countries 
+
+
+```
+
+4. Make interesting graphs
+```{r}
+ggplot(data = life_3yr, aes(x = `Total expenditure`, y = `Life expectancy`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `GDP`, y = `Life expectancy`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `Schooling`, y = `Life expectancy`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `Schooling`, y = `Life expectancy`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `Alcohol`, y = `Life expectancy`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `BMI`, y = `Life expectancy`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `Schooling`, y = `HIV/AIDS`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `Total expenditure`, y = `infant deaths`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+ggplot(data = life_expectancy, aes(x = `Total expenditure`, y = `Adult Mortality`, color = Year)) +
+  geom_point() + scale_color_gradient(low = "blue", high = "red")
+
+life_expectancy %>%
+  select(Status, Year) %>% ggplot(aes(x = `Status`, color = `Year`)) +
+  geom_bar() + scale_color_gradient(low = "blue", high = "red")
+
+
+
+
+```
+5. Modeling 
+```{r}
+#predict which variable is strongest predictor 
+#establish correlation
+
+```
+
+
