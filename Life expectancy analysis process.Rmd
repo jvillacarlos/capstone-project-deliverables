@@ -9,6 +9,7 @@ output: pdf_document
 library(tidyverse)
 library(readr)
 library(ggplot2)
+library(ggpubr)
 ```
 
 #Data Reminders
@@ -213,6 +214,8 @@ summary(social_lm)
 ```
 
 ```{r}
+# for question 4
+
 ## How does immunization affect life expectancy?
 # Immunization and life expectancy are positively correlated to a slight degree.
 ## What kind of immunization have a great influence? Polio and Diphtheria
@@ -241,11 +244,18 @@ plot(expectancy_immunization)
 
 immunization_lm <- lm(`Life expectancy` ~., data = expectancy_immunization)
 summary(immunization_lm)
-backward_economy <- step(immunization_lm, direction = "backward", scope = formula(immunization_lm))
+backward_immunization <- step(immunization_lm, direction = "backward", scope = formula(immunization_lm))
 # Only the immunization for Diphtheria and Polio shows a significant relationship with Life expectancy and it explains 16% of variability in life expectancy. 
+
+#check the residuals of the model
+immunization_residual <- residuals(backward_immunization)
+plot(immunization_residual  ~ `Life expectancy`, data = expectancy_immunization) 
+abline(h = 0)
+hist(immunization_residual) #showing normality
 ```
 
 ```{r}
+# for question 5
 ## Does economical factors and population affect life expectancy? 
 # Economical factors except for Total expenditure affect life expectancy. While population does not affect life expectancy at all.
 
@@ -280,9 +290,46 @@ economy_lm1 <- lm(`Life expectancy` ~ `percentage expenditure` + GDP + `Income c
 summary(economy_lm1)
 # [economy_lm1], percentage expenditure, GDP, and income composition explains 79% of the variability in life expectancy
 backward_economy <- step(economy_lm, direction = "backward", scope = formula(economy_lm))
+
+#check the residuals of the model
+economy_residual <-residuals(backward_economy)
+plot(economy_residual  ~ `Life expectancy`, data = expectancy_economy) 
+abline(h = 0)
+hist(economy_residual) #skewed to the right
 ```
 
 ```{r}
+# for question 6
+
+## Is there a difference between the life expectancy of developed and developing countries?
+
+# df for life expectancy and status
+expectancy_status <- life_expectancy %>%
+  select(`Life expectancy`,Status, Country) %>%
+  remove_missing()
+
+expectancy_status <- rename(expectancy_status,life_expectancy=`Life expectancy`)
+
+# bar plot computing life expectancy based on status
+status <- ggbarplot(data = expectancy_status, 
+                    y = "life_expectancy", x = "Status",
+                    add = "mean", fill = "black", ylab = "Life expectancy",
+               ggtheme = theme_clean())
+
+status
+
+# normality of the data
+shapiro.test(expectancy_status$life_expectancy)
+# non-normal distribution
+
+# kruskal-wallis test
+kruskal.test(expectancy_status$life_expectancy, expectancy_status$Status)
+
+```
+
+```{r}
+# for question 5
+
 # df for expectancy and population
 expectancy_population <- life_expectancy %>%
   select(`Life expectancy`, Population)
@@ -294,6 +341,11 @@ cor.test(expectancy_population$`Life expectancy`, expectancy_population$Populati
 
 # scatter plot for expectancy and population
 ggplot(data = expectancy_population, aes(x = Population, y = `Life expectancy`)) + geom_point() + theme_classic()
+```
+
+```{r}
+# question 6
+
 ```
 
 ```{r}
@@ -319,9 +371,9 @@ cor(health_spend, method = "spearman")
 ggpairs(health_spend)
 #visualize relationships on expenditures and mortality to see if there is improvement in health sector
 
-ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Life expectancy`, color = Status)) + geom_point()
+ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Life expectancy`, color = Status)) + geom_point() + theme_clean()
 
-ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Adult Mortality`, color = Status)) + geom_point() 
+ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Adult Mortality`, color = Status)) + geom_point() + theme_clean()
 
 ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `infant deaths`, color = Status)) + geom_point()
 
