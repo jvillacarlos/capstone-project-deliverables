@@ -210,7 +210,9 @@ ggplot(data = social, aes(x = Schooling, y = `Life expectancy`)) + geom_point() 
 social_lm <- lm(`Life expectancy` ~ Schooling, data = social)
 summary(social_lm)
 #only 56.55% of the variability in life expectancy can be explained by years of schooling
+```
 
+```{r}
 ## How does immunization affect life expectancy?
 # Immunization and life expectancy are positively correlated to a slight degree.
 ## What kind of immunization have a great influence? Polio and Diphtheria
@@ -241,7 +243,9 @@ immunization_lm <- lm(`Life expectancy` ~., data = expectancy_immunization)
 summary(immunization_lm)
 backward_economy <- step(immunization_lm, direction = "backward", scope = formula(immunization_lm))
 # Only the immunization for Diphtheria and Polio shows a significant relationship with Life expectancy and it explains 16% of variability in life expectancy. 
+```
 
+```{r}
 ## Does economical factors and population affect life expectancy? 
 # Economical factors except for Total expenditure affect life expectancy. While population does not affect life expectancy at all.
 
@@ -276,8 +280,9 @@ economy_lm1 <- lm(`Life expectancy` ~ `percentage expenditure` + GDP + `Income c
 summary(economy_lm1)
 # [economy_lm1], percentage expenditure, GDP, and income composition explains 79% of the variability in life expectancy
 backward_economy <- step(economy_lm, direction = "backward", scope = formula(economy_lm))
+```
 
-
+```{r}
 # df for expectancy and population
 expectancy_population <- life_expectancy %>%
   select(`Life expectancy`, Population)
