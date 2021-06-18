@@ -65,6 +65,29 @@ head(life_expectancy)
 names(life_expectancy)
 str(life_expectancy)
 glimpse(life_expectancy)
+dim(life_expectancy)
+
+#check range of values and to see number of NAs
+summary(life_expectancy)
+
+#checking general visualizations of the data
+
+#count of developed and developing countries
+status <- life_expectancy %>%
+  select(Year, Status) %>%
+  group_by(Status, Year) %>%
+  summarise(count = n()) 
+
+status <- life_expectancy %>%
+  select(Year, Status) %>%
+  group_by(Status, Year)
+
+ggplot(data = status, aes(x = factor(Year), fill = Status)) + geom_bar()
+
+#life expectancy per year 
+ggplot(data = life_expectancy, aes(y = `Life expectancy`, x = factor(Year))) + geom_count()
+#we can see that over the years countries are moving towards longer life expectancy, very few points left in 40-50s range 
+
 
 ```
 
