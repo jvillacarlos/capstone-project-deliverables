@@ -9,8 +9,6 @@ output: pdf_document
 library(tidyverse)
 library(readr)
 library(ggplot2)
-library(reshape2)
-library(ggthemes)
 ```
 
 #Data Reminders
@@ -171,11 +169,16 @@ body <- life_expectancy %>%
 alcohol <- life_expectancy %>%
   select(Country, Year, Status,`Life expectancy`,Alcohol) %>%
   remove_missing()
+
+mortality_health <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`Adult Mortality`,`infant deaths`,`under-five deaths`,`Total expenditure` ) %>%
+  remove_missing()
 ```
 
 3. Methods to answer questions 
 ```{r}
 #How does schooling after life expectancy?
+
 #determine how many unique countries are part of the data 
 unique(social$Country) 
 #173 unique countries
@@ -208,7 +211,42 @@ summary(social_lm)
 #only 56.55% of the variability in life expectancy can be explained by years of schooling
 
 ```
-  
+
+```{r}
+#how does health expenditure affect life expectancy 
+#what is the impact of health expenditure
+
+health_spend <- mortality_health %>%
+                  select(-Year, -Status, -Country)
+
+#determine distribution 
+shapiro.test(mortality_health$`Total expenditure`)
+#non normal so nonparametric
+
+cor(health_spend, method = "spearman")
+#only small correlation between variables so unlikely causation 
+
+ggpairs(health_spend)
+#visualize relationships on expenditures and mortality to see if there is improvement in health sector
+
+ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Life expectancy`, color = Status)) + geom_point()
+
+ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Adult Mortality`, color = Status)) + geom_point() 
+
+ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `infant deaths`, color = Status)) + geom_point()
+
+ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `under-five deaths`, color = Status)) + geom_point()
+
+health_lm1 <- lm(`Life expectancy` ~ `Total expenditure`, data = mortality_health)
+summary(health_lm1) #only 4.75% explained 
+health_lm2 <- lm(`Adult Mortality` ~ `Total expenditure`, data = mortality_health)
+summary(health_lm2)  #only 1.32% explained
+health_lm3 <- lm(`infant deaths` ~ `Total expenditure`, data = mortality_health)
+summary(health_lm3)  #only 1.66% explained
+health_lm4 <- lm(`under-five deaths` ~ `Total expenditure`, data = mortality_health)
+summary(health_lm4) #only 1.69% explained
+```
+
 
 4. Make interesting graphs
 ```{r}
@@ -252,32 +290,4 @@ life_expectancy %>%
 
 ```
 
-Question 4: How does immunization affect life expectancy?
-Immunization and life expectancy are positively correlated to a slight degree.
-What kind of immunization have a great influence? Polio and Diphtheria
-
-```{r}
-# df for life expectancy and different kinds of immunization
-expectancy_immunization <- immunization %>%
-  select(`Life expectancy`,`Hepatitis B`,Polio,Diphtheria)
-
-# compute correlation
-immunization_cormat <- round(cor(expectancy_immunization),2)
-immunization_cormat[upper.tri(immunization_cormat)] <- NA
-head(immunization_cormat)
-
-# reshape correlation
-immunization_melted_cormat <- melt(immunization_cormat, na.rm = TRUE)
-head(immunization_melted_cormat)
-
-# plotting melted cormat
-ggplot(immunization_melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
-  scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1), midpoint = 0, name = "Pearson\nCorrelation") +
-  geom_tile() + theme_clean()
-
-# multiple linear regression model for immunization
-plot(expectancy_immunization)
-immunization_model <- lm(formula = `Life expectancy` ~ Polio + Diphtheria, data = expectancy_immunization)
-summary(immunization_model)
-```
 
