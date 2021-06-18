@@ -216,8 +216,14 @@ summary(social_lm)
 #how does health expenditure affect life expectancy 
 #what is the impact of health expenditure
 
+#show distribution of total expenditure in developed and developing countries over the years
+ggplot(data = mortality_health, aes(x = Status, y = `Total expenditure`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free")
+
+mortality_health <- mortality_health %>%
+                    filter(Year != 2015)
+
 health_spend <- mortality_health %>%
-                  select(-Year, -Status, -Country)
+                  select(-Year, -Status, -Country) 
 
 #determine distribution 
 shapiro.test(mortality_health$`Total expenditure`)
@@ -238,56 +244,81 @@ ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `infant deaths`
 ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `under-five deaths`, color = Status)) + geom_point()
 
 health_lm1 <- lm(`Life expectancy` ~ `Total expenditure`, data = mortality_health)
-summary(health_lm1) #only 4.75% explained 
+summary(health_lm1) #only 4.77% explained 
 health_lm2 <- lm(`Adult Mortality` ~ `Total expenditure`, data = mortality_health)
-summary(health_lm2)  #only 1.32% explained
+summary(health_lm2)  #only 1.37% explained
 health_lm3 <- lm(`infant deaths` ~ `Total expenditure`, data = mortality_health)
-summary(health_lm3)  #only 1.66% explained
+summary(health_lm3)  #only 1.67% explained
 health_lm4 <- lm(`under-five deaths` ~ `Total expenditure`, data = mortality_health)
-summary(health_lm4) #only 1.69% explained
+summary(health_lm4) #only 1.70% explained
 ```
 
-
-4. Make interesting graphs
 ```{r}
-ggplot(data = life_3yr, aes(x = `Total expenditure`, y = `Life expectancy`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+#what are the predictor factors for life expectancy
+#how did life expectancy change over the years
 
-ggplot(data = life_expectancy, aes(x = `GDP`, y = `Life expectancy`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+#show  life expectancy in developed and developing countries over the years
+ggplot(data = life_expectancy, aes(x = Status, y = `Life expectancy`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free")
+#shows that life expectancy really improved over the years, still there is gap between the developed and developing countries 
 
-ggplot(data = life_expectancy, aes(x = `Schooling`, y = `Life expectancy`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+#remove all rows with NA
+life_complete <- life_expectancy %>%
+                  drop_na() %>%
+                  select(-Country, -Year, -Status)
+dim(life_complete) 
+#removed 1289 values
 
-ggplot(data = life_expectancy, aes(x = `Schooling`, y = `Life expectancy`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+#know which predictor variables are most important
+life_lm <- lm(`Life expectancy` ~., data = life_complete)
+backward_life <- step(life_lm, direction = "backward", scope = formula(life_lm))
+backward_life
 
-ggplot(data = life_expectancy, aes(x = `Alcohol`, y = `Life expectancy`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+#result of backward regression
+backward_lifelm <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    Alcohol + `percentage expenditure` + BMI + `under-five deaths` + 
+    `Total expenditure` + Diphtheria + `HIV/AIDS` + `thinness 5-9 years` + 
+    `Income composition of resources` + Schooling, data = life_complete)
 
-ggplot(data = life_expectancy, aes(x = `BMI`, y = `Life expectancy`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+backward_lifelm
+summary(backward_lifelm)
 
-ggplot(data = life_expectancy, aes(x = `Schooling`, y = `HIV/AIDS`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+#trying to increase adjusted R2 by removing those with low p values
+backward_lifelm1 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    `percentage expenditure` + BMI + `under-five deaths` + Diphtheria + `HIV/AIDS` + `thinness 5-9 years` + 
+    `Income composition of resources` + Schooling, data = life_complete)
 
-ggplot(data = life_expectancy, aes(x = `Total expenditure`, y = `infant deaths`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+backward_lifelm1
+summary(backward_lifelm1)
 
-ggplot(data = life_expectancy, aes(x = `Total expenditure`, y = `Adult Mortality`, color = Year)) +
-  geom_point() + scale_color_gradient(low = "blue", high = "red")
+backward_lifelm2 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    `percentage expenditure` + BMI + `under-five deaths` + Diphtheria + `HIV/AIDS`  + 
+    `Income composition of resources` + Schooling, data = life_complete)
 
-life_expectancy %>%
-  select(Status, Year) %>% ggplot(aes(x = `Status`, color = `Year`)) +
-  geom_bar() + scale_color_gradient(low = "blue", high = "red")
+backward_lifelm2
+summary(backward_lifelm2)
 
+backward_lifelm3 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    `percentage expenditure` + BMI + `under-five deaths` + `HIV/AIDS`  + 
+    `Income composition of resources` + Schooling, data = life_complete)
+
+backward_lifelm3
+summary(backward_lifelm3)
+
+summary(life_lm) #check for the final predictor equation
+AIC(backward_lifelm)
+AIC(backward_lifelm1)
+AIC(backward_lifelm2)
+AIC(backward_lifelm3)
+
+#best model is the model found using the backward regression
+
+#check the residuals of the model
+life_residual <-residuals(backward_lifelm)
+plot(life_residual  ~ `Life expectancy`, data = life_complete) 
+abline(h = 0)
+hist(life_residual) #showing normality
 ```
 
-5. Modeling 
-```{r}
-#predict which variable is strongest predictor 
-#establish correlation
 
-```
 
 
