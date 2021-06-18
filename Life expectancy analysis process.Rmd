@@ -10,6 +10,51 @@ library(tidyverse)
 
 ```
 
+#Data Reminders
+1. Project gathered data from 2000-2015 from 193 countries
+2. Must remove the missing data 
+3. N/A usually from less known countries like Vanuatu, Tonga, Togo, Cabo Verde, etc
+4. Could possible have 20 predicting variables
+5. Predicting variables could be divided into categories: immunization related, mortality factors, economical factors, and social factors. 
+
+#Possible Questions
+1. What are the predicting factors that actually affects life expectancy? How did these factors change over the years?
+2. Should a country having lower life expectancy (>65) increase its healthcare expenditure to improve average lifespan?
+3. How does infant and adult mortality rates affects life expectancy?
+4. What is the relationship between life expectancy and lifestyle habits? Which habits has a greater influence on life expectancy?
+5. What is the influence of schooling or education on life expectancy?
+6. What is the relationship between countries' health expenditure and life expectancy?
+7. How does immunization affect life expectancy? What kind of immunizations have a greater influence?
+8. Does economical factors and population affect life expectancy?
+9. Is there a difference between the life expectancy of developed and developing countries?
+10. What is the effect of BMI on life expectancy?
+11. What is the relationship of immunization and under five deaths?
+12. What is the relationship of thinness and under five deaths?
+
+#Information on the variables
+1. country
+2. year
+3. status: developing or developed
+4. life expectancy
+5. adult mortality: rates of both sexes, probability of dying between 15 and 60 years per 1000 population
+6. infant deaths: number of infant deaths per 1000 population
+7. alcohol: recorded per capita consumption (liters of pure alcohol)
+8. percentage expenditure: expenditure on health as % of GDP per capita (%)
+9. Hepatitis B: coverage among 1-yr-olds (%)
+10. Measles: number of reported cases per 1000 population
+11. BMI: average BMI of entire population
+12. under five deaths: number of under 5 deaths per 1000 population
+13. Polio: coverage among 1-yr-olds (%)
+14. total expenditure: general government expenditure on health as % of total government expenditure (%)
+15. diphtheria: diphtheria tetanus toxoid and pertussis(DTP3) coverage among 1-yr-olds(%)
+16. HIV/AIDS: deaths per 1000 live births (0-4yrs)
+17. GDP: GDP per capita (in USD)
+18. Population    
+19. thinness 1-19 (age 10-19) (%)
+20. thinness 5-9 years (age 5-9) (%)
+21. income composition: human development index interms of income composition resources 
+22. Schooling: number of years of schooling (yrs)
+
 1. Checking data set structure
 ```{r}
 # importing data set
