@@ -10,6 +10,7 @@ library(tidyverse)
 library(readr)
 library(ggplot2)
 library(reshape2)
+library(ggthemes)
 ```
 
 #Data Reminders
@@ -228,9 +229,8 @@ head(immunization_melted_cormat)
 
 # plotting melted cormat
 ggplot(immunization_melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
-  scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1),
-                       midpoint = 0, name = "Pearson\nCorrelation") +
-  geom_tile() + theme_classic()
+  scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1), midpoint = 0, name = "Pearson\nCorrelation") +
+  geom_tile() + theme_clean()
 
 # multiple linear regression model for immunization
 plot(expectancy_immunization)
