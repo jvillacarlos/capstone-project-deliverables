@@ -13,4 +13,9 @@ In this repository, you can find the following materials:
 9. *Life Expectancy Data.csv* - this contains the data used in the capstone project
 
 In this project the following questions were asked: 
-1. 
+1. What are the predicting factors that actually affects life expectancy? How did these factors change over the years?
+2. Should a country having lower life expectancy (>65) increase its healthcare expenditure to improve average lifespan?
+3. What is the influence of schooling or education on life expectancy?
+4. How does immunization affect life expectancy? What kind of immunizations have a greater influence?
+5. Does economical factors and population affect life expectancy?
+6. Is there a difference between the life expectancy of developed and developing countries?
