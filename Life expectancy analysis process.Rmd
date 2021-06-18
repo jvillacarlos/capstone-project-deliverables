@@ -77,6 +77,7 @@ status <- life_expectancy %>%
   select(Year, Status) %>%
   group_by(Status, Year) %>%
   summarise(count = n()) 
+#the status of countries per year did not change as much over the years
 
 status <- life_expectancy %>%
   select(Year, Status) %>%
@@ -88,6 +89,18 @@ ggplot(data = status, aes(x = factor(Year), fill = Status)) + geom_bar()
 ggplot(data = life_expectancy, aes(y = `Life expectancy`, x = factor(Year))) + geom_count()
 #we can see that over the years countries are moving towards longer life expectancy, very few points left in 40-50s range 
 
+#check correlations between variables
+shapiro.test(life_expectancy$`Life expectancy`)
+#nonnormal so must perform nonparametric correlation tests
+
+#check possible correlations 
+life_cor <- life_expectancy %>% 
+              select(-Status, -Country, -Year)
+life_cor <- cor(life_cor, use = "na.or.complete", method = "spearman")
+life_cor
+
+library(GGally)
+ggpairs(life_cor)
 
 ```
 
