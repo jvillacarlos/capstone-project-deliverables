@@ -32,6 +32,14 @@ library(ggplot2)
 11. What is the relationship of immunization and under five deaths?
 12. What is the relationship of thinness and under five deaths?
 
+#Final questions
+1. What are the predicting factors that actually affects life expectancy? How did these factors change over the years?
+2. Should a country having lower life expectancy (>65) increase its healthcare expenditure to improve average lifespan?
+3. What is the influence of schooling or education on life expectancy?
+4. How does immunization affect life expectancy? What kind of immunizations have a greater influence?
+5. Does economical factors and population affect life expectancy?
+6. Is there a difference between the life expectancy of developed and developing countries?
+
 #Information on the variables
 1. country
 2. year
@@ -102,6 +110,7 @@ life_cor
 
 library(GGally)
 ggpairs(life_cor)
+#almost all variables have high correlation coefficients, except for Hepatitis B and Population. 
 
 ```
 
@@ -136,8 +145,6 @@ life_complete %>%
 
 unique(life_complete$Country) #removed 33 countries 
 
-#remove the 0.000 
-
 # creating a tidy dataframe for immunization related variables
 immunization <- life_expectancy %>%
   select(Country, Year, Status,`Life expectancy`,`Hepatitis B`,Measles,Polio,Diphtheria) %>%
@@ -164,17 +171,42 @@ alcohol <- life_expectancy %>%
   remove_missing()
 ```
 
-3. Make interesting groupings or summaries
+3. Methods to answer questions 
 ```{r}
-#per year arrangement (maybe look at for every 3 years change)
+#How does schooling after life expectancy?
+#determine how many unique countries are part of the data 
+unique(social$Country) 
+#173 unique countries
 
-life_3yr <- life_expectancy %>%
-              filter(Year == c(2000, 2003, 2006, 2009, 2012, 2015))
+#show summary of schooling years and life expectancy in developing and developed countries
+developedS <- social %>%
+  filter(Status == "Developed") %>%
+  select(-Year, -Status)
+summary(developedS)
 
-#compare life expectancy of developing vs developed countries 
+developingS <- social %>%
+  filter(Status == "Developing") %>%
+  select(-Year, -Status)
+summary(developingS)
 
+ggplot(data = social, aes(x = Status, y = `Life expectancy`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") 
+ggplot(data = social, aes(x = Status, y = `Schooling`)) + geom_boxplot() + stat_summary(fun = mean, geom = "point", size = 2, color = "red") 
+#shows that there is a difference in schooling years and life expectancy for developing and developed countries
+
+#determine if there is a correlation and causation between schooling and life expectancy
+cor.test(social$`Life expectancy`, social$Schooling)
+#indicates high correlation so can be modeled using linear regression 
+
+#visual the relationship using lm  
+ggplot(data = social, aes(x = Schooling, y = `Life expectancy`)) + geom_point() + geom_smooth(method = "lm") + xlab("Schooling (yr)") + ylab("Life expectancy(yr)")
+
+#test if there is causation
+social_lm <- lm(`Life expectancy` ~ Schooling, data = social)
+summary(social_lm)
+#only 56.55% of the variability in life expectancy can be explained by years of schooling
 
 ```
+  
 
 4. Make interesting graphs
 ```{r}
@@ -209,10 +241,8 @@ life_expectancy %>%
   select(Status, Year) %>% ggplot(aes(x = `Status`, color = `Year`)) +
   geom_bar() + scale_color_gradient(low = "blue", high = "red")
 
-
-
-
 ```
+
 5. Modeling 
 ```{r}
 #predict which variable is strongest predictor 
