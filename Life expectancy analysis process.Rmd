@@ -7,7 +7,8 @@ output: pdf_document
 ```{r}
 #packages
 library(tidyverse)
-
+library(readr)
+library(ggplot2)
 ```
 
 #Data Reminders
@@ -58,7 +59,7 @@ library(tidyverse)
 1. Checking data set structure
 ```{r}
 # importing data set
-life_expectancy <- read_csv("C:/Users/user/Desktop/BIO 188 CLASS/capstone-project-deliverables/Life Expectancy Data.csv")
+life_expectancy <- read_csv("Life Expectancy Data.csv")
 
 # checking data set
 head(life_expectancy)
@@ -123,6 +124,31 @@ life_complete %>%
 unique(life_complete$Country) #removed 33 countries 
 
 #remove the 0.000 
+
+# creating a tidy dataframe for immunization related variables
+immunization <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`Hepatitis B`,Measles,Polio,Diphtheria) %>%
+  remove_missing()
+
+mortality <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`Adult Mortality`,`infant deaths`,`under-five deaths`) %>%
+  remove_missing()
+
+economical <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`percentage expenditure`,`Total expenditure`,GDP,`Income composition of resources`) %>%
+  remove_missing()
+  
+social <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,Schooling) %>%
+  remove_missing()
+
+body <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`thinness  1-19 years`,`thinness 5-9 years`,BMI) %>%
+  remove_missing() 
+
+alcohol <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,Alcohol) %>%
+  remove_missing()
 ```
 
 3. Make interesting groupings or summaries
