@@ -1,0 +1,411 @@
+---
+title: "Analysis on Life Expectancy Report Paper"
+author: "Krissa Joy Tabornal & Jan Ira Villacarlos"
+date: "6/1/2021"
+output: pdf_document
+---
+
+# Introduction
+Life expectancy is the estimated hypothetical average number of years that a person of a certain age is expected to live (Bezy, 2020). The measure is influenced by numerous factors and differs by sex, age, race, and geographic location. It reflects many local conditions, such as cultural lifestyles, urbanization, healthcare access, and economical factors. 
+In this capstone project, life expectancy data from 2000 to 2015 will be analyzed. The main goal of this project is to determine the predicting factors that significantly affect life expectancy. The analysis will focus on immunization factors, mortality factors, economic factors, social factors and health factors. This can help in gaining insight about specific factors that should be given more importance to effectively improve the life expectancy of the population. 
+
+The project aims to answer the following questions: 
+1. What are the predicting factors that actually affect life expectancy? Has life expectancy improved over the years? Is there a difference between the life expectancy of developed countries and developing countries?
+2. How does healthcare expenditure influence average lifespan?
+3. How does schooling or education affect life expectancy?
+4. How does immunization affect life expectancy? What kind of immunizations have a greater influence?
+5. How do economic factors affect life expectancy? 
+
+# Data
+The ‘Life Expectancy’ dataset was posted by KumarRajarshi in Kaggle and can be accessed at https://www.kaggle.com/kumarajarshi/life-expectancy-who. This data was collected from the Global Health Observatory (GHO), a data repository, owned by the World Health Organization (WHO) and United Nations (UN), which records data about health status and other factors for all countries. The data includes a set of predictor variables that might have an impact on life expectancy in different countries. The variables included in the data set are the following: country, year, status, life expectancy, adult mortality, infant deaths, alcohol, percentage expenditure, hepatitis b, measles, BMI, under-five deaths, polio, total expenditure, diphtheria, HIV/AIDS, GDP, population, thinness 1-19 years, thinness 5-9 years, income composition of resources, and schooling. These variables were classified into immunization related, mortality, health, economic, and social factors. Overall, the data set contains 22 variables and 2938 observations containing data from 2000-2015 for 193 countries. 
+###Loading Packages
+```{r}
+#packages
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(ggpubr)
+library(ggthemes)
+library(GGally)
+```
+
+### Checking data set structure
+```{r}
+# importing data set
+life_expectancy <- read_csv("Life Expectancy Data.csv")
+
+# checking data set
+head(life_expectancy)
+names(life_expectancy)
+str(life_expectancy)
+glimpse(life_expectancy)
+dim(life_expectancy)
+```
+
+# Data Analysis
+Life expectancy was the main outcome of this analysis. The aforementioned predictor variables were used to answer the research questions. The tidyverse was the main package used in the analysis. First, the data was first examined using head(), names(), str(), dim(), and summary(). The summary results showed that there were missing values in some variables. The developing and developed countries were also counted from 2000-2015. Preliminary visualization using geom_count() was performed to get a glimpse of the range of life expectancy for each year and differentiate data values from developed and developing countries. Correlation test was also conducted using cor() and ggpairs() to know which variables are good candidates in predicting life expectancy.  
+
+####Checking general visualizations of the data
+```{r}
+#check range of values and to see number of NAs
+summary(life_expectancy)
+
+#count of developed and developing countries
+status <- life_expectancy %>%
+  select(Year, Status) %>%
+  group_by(Status, Year) %>%
+  summarise(count = n()) 
+#the status of countries per year did not change as much over the years
+
+status <- life_expectancy %>%
+  select(Year, Status) %>%
+  group_by(Status, Year)
+
+ggplot(data = status, aes(x = factor(Year), fill = Status)) + geom_bar() + theme_clean()
+
+#life expectancy per year 
+ggplot(data = life_expectancy, aes(y = `Life expectancy`, x = factor(Year))) + geom_count() + theme_clean()
+#we can see that over the years countries are moving towards longer life expectancy, very few points left in 40-50s range 
+
+#check correlations between variables
+shapiro.test(life_expectancy$`Life expectancy`)
+#nonnormal so must perform nonparametric correlation tests
+
+#check possible correlations 
+life_cor <- life_expectancy %>% 
+              select(-Status, -Country, -Year)
+life_cor <- cor(life_cor, use = "na.or.complete", method = "spearman")
+life_cor
+
+ggpairs(life_cor)
+#almost all variables have high correlation coefficients, except for Hepatitis B and Population
+```
+
+Second, tidying the data was performed. Separate data frames were created based on the focus of analysis per section. The variables were grouped into categories: immunization factors, mortality factors, economic factors, social factors, and health factors. This was done to easily organize the data and to minimize the impact of removing the missing values. Data values for GDP and percentage expenditure were rounded off to three decimal places. 
+
+```{r}
+#round off numbers 
+life_expectancy$`percentage expenditure` <- round(life_expectancy$`percentage expenditure`, digits = 3)
+life_expectancy$GDP <- round(life_expectancy$GDP, digits = 3)
+
+#inspect the years with data
+unique(life_expectancy$Year)
+
+#count how many countries have data for each year
+life_expectancy %>%
+  group_by(Year) %>%
+  summarise(count = n())
+
+# creating a tidy dataframe for each categories
+
+#immunization related factors
+immunization <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`Hepatitis B`,Measles,Polio,Diphtheria) %>%
+  remove_missing()
+
+#economical related factors
+economical <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`percentage expenditure`,`Total expenditure`,GDP,`Income composition of resources`) %>%
+  remove_missing()
+
+#social related factors
+social <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,Schooling) %>%
+  remove_missing()
+
+#health related factors
+body <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`thinness  1-19 years`,`thinness 5-9 years`,BMI) %>%
+  remove_missing() 
+
+#lifestyle related factor
+alcohol <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,Alcohol) %>%
+  remove_missing()
+
+#mortality and health related factors
+mortality_health <- life_expectancy %>%
+  select(Country, Year, Status,`Life expectancy`,`Adult Mortality`,`infant deaths`,`under-five deaths`,`Total expenditure` ) %>%
+  remove_missing()
+```
+
+The mean life expectancy from 2000-2015 were visualized using geom_point() and geom_line() to examine if life expectancy has changed over the years. The time series graph showed that the average life span has increased from 66.75 years in 2000 to 71.62 years in 2015. 
+
+```{r}
+mean_life <- life_expectancy %>%
+                select(Year, `Life expectancy`) %>%
+                filter(!is.na(`Life expectancy`)) %>%
+                group_by(Year) %>%
+                arrange(Year) %>%
+                summarise(mean = mean(`Life expectancy`))
+
+ggplot(data = mean_life, aes(x = Year, y = `mean`)) + geom_point() + geom_line() + ylab("Mean Life Expectancy")
+#shows increase in life expectancy from 2000-2015
+```
+
+##Life Expectancy and Predicting Factors 
+We hypothesized that life expectancy is greatly influenced by health related factors, such as immunization, health care expenditure, and child and adult mortality. To know which predictors significantly affect life expectancy, multiple linear regression was used. Backward regression was implemented to end up with the variables that have the greatest effect on life expectancy. To make sure that the model is valid, the p-value for each variable and the adjusted R2 value and residual error for each model were examined. The AIC method was used in choosing the best model; the least value corresponds to the model that can explain most variability in life expectancy.  
+	
+The regression model that showed the lowest AIC and the highest adjusted R2 value contained the following variables: adult mortality, infant deaths, alcohol, percentage expenditure, BMI, under-five deaths, total expenditure, Diphtheria, HIV/AIDS, thinness 5-9 years, income composition of resources, and schooling. All predictor values included in this model have a p-value lower than 0.05, except for alcohol and total expenditure. The histogram of the residuals showed a normal distribution. 
+	
+This model can explain 83.31% of variability in life expectancy and only has 3.594 residual standard error. The final equation of the model is as follows. 
+Life expectancy = 53.30 - 0.02 (Adult Mortality) + 0.09 (Infant deaths) - 0.05 (Alcohol) + 0.0005 (Percentage expenditure) + 0.033(BMI) - 0.07 (under-five deaths) + 0.08 (Total Expenditure) + 0.01 (Diphtheria) - 0.44 (HIV/AIDS) - 0.06 (thinness 5-9 years) + 9.88 (income composition of resources) + 0.89 (Schooling) - 0.0028 error
+
+This agrees with our hypothesis, given that most of these significant variables are health related factors. Income composition resources and schooling have the highest slope values, emphasizing the critical role of economic factors and education in improving people’s lives. The slope value for the infant deaths was the only one that did not meet with our expectations, since we expected a negative relationship with life expectancy. However, according to Murray, 1988, infant mortality rate is not a good indicator of overall mortality. It could be argued that this slight positive relationship can be due to differences between the developing and developed countries. Overall, the model has a p-value of 2.2x10-16, confirming that it is statistically significant. 
+
+```{r}
+#remove all rows with NA
+life_complete <- life_expectancy %>%
+                  drop_na() %>%
+                  select(-Country, -Year, -Status)
+dim(life_complete) 
+#removed 1289 values
+
+#know which predictor variables are most important
+life_lm <- lm(`Life expectancy` ~., data = life_complete)
+summary(life_lm) #check variables with lowest p values
+
+#perform backward regression
+backward_life <- step(life_lm, direction = "backward", scope = formula(life_lm))
+backward_life
+
+#result of backward regression
+backward_lifelm <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    Alcohol + `percentage expenditure` + BMI + `under-five deaths` + 
+    `Total expenditure` + Diphtheria + `HIV/AIDS` + `thinness 5-9 years` + 
+    `Income composition of resources` + Schooling, data = life_complete)
+
+backward_lifelm #use to find equation
+summary(backward_lifelm) #used to find adjusted R squared, residual standard error, and median error
+
+#trying to increase adjusted R2 by removing those with low p values
+backward_lifelm1 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    `percentage expenditure` + BMI + `under-five deaths` + Diphtheria + `HIV/AIDS` + `thinness 5-9 years` + 
+    `Income composition of resources` + Schooling, data = life_complete)
+
+backward_lifelm1
+summary(backward_lifelm1)
+
+backward_lifelm2 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    `percentage expenditure` + BMI + `under-five deaths` + Diphtheria + `HIV/AIDS`  + 
+    `Income composition of resources` + Schooling, data = life_complete)
+
+backward_lifelm2
+summary(backward_lifelm2)
+
+backward_lifelm3 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
+    `percentage expenditure` + BMI + `under-five deaths` + `HIV/AIDS`  + 
+    `Income composition of resources` + Schooling, data = life_complete)
+
+backward_lifelm3
+summary(backward_lifelm3)
+
+#compare AIC values
+AIC(backward_lifelm)
+AIC(backward_lifelm1)
+AIC(backward_lifelm2)
+AIC(backward_lifelm3)
+
+#best model is the model found using the backward regression, has the lowest AIC
+
+#check the residuals of the best model
+life_residual <-residuals(backward_lifelm)
+plot(life_residual  ~ `Life expectancy`, data = life_complete) 
+abline(h = 0)
+hist(life_residual) #showing normality
+```
+
+##Life Expectancy Between Developed and Developing Countries
+The mean life expectancy between developed and developing countries was visualized in a bar plot. The normality of the data was tested using the Shapiro-Wilk test, showing a non-normal distribution of life expectancy between developed and developing countries. Thus, the difference was tested with a Mann-Whitney test, wherein results showed that there is a significant difference between the life expectancy of developed and developing countries (p-value < 2.2 x 10-16). The life expectancy is higher in developed countries with an average and a median of 79 years than in developing countries with an average life expectancy of 67 years and a median of 69 years. 
+
+```{r}
+# df for life expectancy and status
+expectancy_status <- life_expectancy %>%
+  select(`Life expectancy`,Status, Country) %>%
+  remove_missing()
+
+expectancy_status <- rename(expectancy_status,life_expectancy=`Life expectancy`)
+
+# bar plot computing life expectancy based on status
+status <- ggbarplot(data = expectancy_status, 
+                    y = "life_expectancy", x = "Status",
+                    add = "mean", fill = "black", ylab = "Life expectancy",
+               ggtheme = theme_clean())
+status
+
+# normality of the data
+shapiro.test(expectancy_status$life_expectancy)
+# non-normal distribution
+
+#perform Mann Whitney Test
+wilcox.test(`life_expectancy` ~ Status, data = expectancy_status, exact = FALSE)
+#significant difference
+
+#summarize mean and median results 
+expectancy_status %>%
+group_by(Status) %>%
+summarize(Mean = mean(life_expectancy, na.rm=TRUE),
+          Median = median(life_expectancy), Count = n())
+```
+
+##Life Expectancy and Health Expenditure
+We hypothesized that health expenditure is positively associated with life expectancy. Larger budget for public health access will contribute positively to people’s quality of life. We chose to analyze the total expenditure rather than the percentage expenditure as it gives more information about the government’s allocation of its spendings for healthcare purposes. The total expenditure for both developed and developing countries were visualized. The graph shows expectedly that most of the developed countries have higher spendings for health related resources relative to developing countries. Since the graph showed no data from developed countries in 2015, all datas in 2015 was removed to avoid bias in analyzing total expenditure based on the status of the countries. 
+	
+The total expenditure was not normally distributed, so a Spearman correlation test was used. Total expenditure was found to have a weak correlation with life expectancy and mortality rates, with correlation coefficients that ranges from -0.22 to 0.29. The low correlation coefficient predicts that total expenditure does not have a significant, high causal factor for life expectancy. This was confirmed using simple linear regression, showing that total expenditure can only explain 4.77% variability in life expectancy. This low correlation can be due to how the health expenses were converted to actual health care services that people have accessed. This could be influenced by the population, general education about health care, and information access on services in each country. 
+
+```{r}
+#show distribution of total expenditure in developed and developing countries over the years
+ggplot(data = mortality_health, aes(x = Status, y = `Total expenditure`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free")
+#shows no data available for developed countries in 2015
+
+#remove data values in 2015
+mortality_health <- mortality_health %>%
+                    filter(Year != 2015)
+
+#make df for easy correlation , so remove nonnumerical variables
+health_spend <- mortality_health %>%
+                  select(-Year, -Status, -Country) 
+
+#determine distribution 
+shapiro.test(mortality_health$`Total expenditure`)
+#non normal so nonparametric
+
+cor(health_spend, method = "spearman")
+#only small correlation between variables so unlikely causation 
+
+ggpairs(health_spend)
+#visualize relationships on expenditures and mortality to see if there is improvement in health sector
+
+#perform simple linear regression
+health_lm1 <- lm(`Life expectancy` ~ `Total expenditure`, data = mortality_health)
+summary(health_lm1) #only 4.77% explained 
+```
+
+##Life Expectancy and Education
+We hypothesized that education will positively affect life expectancy. The box plot showed that developed countries have longer schooling years compared to the developing countries. The Spearman correlation test showed a high correlation coefficient of 0.814, indicating that schooling and life expectancy have a strong positive relationship with each other. Moreover, the simple linear regression demonstrated that schooling years can explain 56.55% of the variation in life expectancy. The equation of the model is as follows: Life expectancy = 44.109 + 2.103(Schooling) + 0.6186 error. Long schooling years is a good indicator of quality education that can help individuals in leading healthy and productive lives in their community. 
+	
+```{r}
+#show summary of schooling years and life expectancy in developing and developed countries
+developedS <- social %>%
+  filter(Status == "Developed") %>%
+  select(-Year, -Status)
+summary(developedS)
+
+developingS <- social %>%
+  filter(Status == "Developing") %>%
+  select(-Year, -Status)
+summary(developingS)
+
+#visualize the summaries
+ggplot(data = social, aes(x = Status, y = `Life expectancy`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + theme_clean()
+ggplot(data = social, aes(x = Status, y = `Schooling`)) + geom_boxplot() + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + theme_clean()
+#shows that there is a difference in schooling years and life expectancy for developing and developed countries
+
+#determine if there is a correlation and causation between schooling and life expectancy
+cor.test(social$`Life expectancy`, social$Schooling, method = "spearman")
+#indicates high correlation so can be modeled using linear regression 
+
+#visualize the relationship using lm  
+ggplot(data = social, aes(x = Schooling, y = `Life expectancy`)) + geom_point() + geom_smooth(method = "lm") + xlab("Schooling (yr)") + ylab("Life expectancy(yr)") + theme_clean()
+
+#test if there is causation
+social_lm <- lm(`Life expectancy` ~ Schooling, data = social)
+summary(social_lm)
+#only 56.55% of the variability in life expectancy can be explained by years of schooling
+```
+
+##Life Expectancy and Immunization
+Immunization for Hepatitis B, Diphtheria, and Polio were reported as immunization coverage among one-year-olds in percentage. The relationship between life expectancy by immunization factor was tested using the Spearman correlation test. All immunization factors showed a positive correlation with life expectancy. An increasing percentage of immunization coverage among one-year-olds, corresponds to increase in life expectancy. Immunization for Polio and Diphtheria showed a moderately high positive correlation with life expectancy while hepatitis B only showed low positive correlation. The relationship between immunization and life expectancy were further analyzed using a multiple linear regression model. The results showed that immunization for diphtheria and polio explains 16% of the variability in life expectancy. The model has an AIC value of 9700.55 and the residuals are normally distributed. Overall, the model has a p-value of 2.2x10-16, affirming that it is statistically significant. This shows that immunization is an important health factor that improves life expectancy by protecting the individual from succumbing to preventable deadly diseases, such as Polio and Diphtheria. The equation of the model is as follows. 
+Life expectancy = 54.838 + 0.0852(Polio) + 0.0929 (Diphtheria) + 1.333 error
+
+```{r}
+# df for life expectancy and different kinds of immunization
+expectancy_immunization <- immunization %>%
+  select(`Life expectancy`,`Hepatitis B`,Polio,Diphtheria)
+
+# compute correlation
+immunization_cormat <- round(cor(expectancy_immunization, method = "spearman"),2)
+immunization_cormat[upper.tri(immunization_cormat)] <- NA
+head(immunization_cormat)
+# Hepatitis B, Polio, and Diphtheria shows a slight correlation 
+
+# reshape correlation
+immunization_melted_cormat <- melt(immunization_cormat, na.rm = TRUE)
+head(immunization_melted_cormat)
+
+# plotting melted cormat
+ggplot(immunization_melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
+  scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1), midpoint = 0, name = "Spearman\nCorrelation") +
+  geom_text(aes(Var2,Var1,label = value), color = "black",size = 4) +
+  geom_tile() + theme_clean()
+
+# multiple linear regression model for immunization
+plot(expectancy_immunization)
+
+immunization_lm <- lm(`Life expectancy` ~., data = expectancy_immunization)
+summary(immunization_lm)
+backward_immunization <- step(immunization_lm, direction = "backward", scope = formula(immunization_lm))
+
+immune_lm <-lm(`Life expectancy` ~ Polio + Diphtheria, data = expectancy_immunization)
+immune_lm
+summary(immune_lm)
+# Only the immunization for Diphtheria and Polio shows a significant relationship with Life expectancy and it explains 16% of variability in life expectancy. 
+
+#check the residuals of the model
+immunization_residual <- residuals(backward_immunization)
+plot(immunization_residual  ~ `Life expectancy`, data = expectancy_immunization) 
+abline(h = 0)
+hist(immunization_residual) #showing normality
+```
+
+##Life Expectancy and Economic Factors
+There are four predictor variables classified as part of the economic factors, namely, percentage expenditure reported as expenditure on health as percentage of GDP per capita, total expenditure reported as general government expenditure on health as a percentage of total government expenditure, GDP reported in USD, and income composition of resources reported as Human Development Index ranging from 0 to 1. All of the economic factors exhibit a positive correlation with life expectancy using the Spearman correlation. Income composition of resources shows a very strong correlation to life expectancy with a correlation coefficient of 0.91. Percentage expenditure (r = 0.65) and GDP (r = 0.64) has a strong correlation to life expectancy. On the other hand, total expenditure (r = 0.26) is only weakly correlated with life expectancy. Additionally, the multiple linear regression results showed that all economic factors except for total expenditure has a significant relationship with life expectancy. The model explains 79% of the variability in life expectancy and is significant (p = 2.2x 10-16). Moreover, the model has an AIC value of 6587.29 and the residuals show a normal distribution. This demonstrates the critical role of the country’s economy in ensuring good, quality life to its population by providing enough goods to meet the basic needs and providing high quality healthcare and public services. The equation of the model is as follows. 
+Life expectancy = 35.11 + 0.00042 (percentage expenditure) - 0.000074(GDP) + 52.43(Income composition of resources) + 0.3022 error
+
+```{r}
+# df for life expectancy and economical factors
+expectancy_economy <- economical %>%
+  select(`Life expectancy`,`percentage expenditure`,`Total expenditure`,GDP,
+         `Income composition of resources`) %>%
+  filter(`Income composition of resources` > 0)
+
+
+# compute correlation
+economy_cormat <- round(cor(expectancy_economy, method = "spearman"),2)
+economy_cormat[upper.tri(economy_cormat)] <- NA
+economy_cormat
+# Percentage expenditure, GDP, and income composition of resources shows a high correlation with expectancy. While total expenditure only shows a slight correlation.
+
+# reshape correlation
+economy_melted_cormat <- melt(economy_cormat, na.rm = TRUE)
+head(economy_melted_cormat)
+
+# plotting melted cormat
+ggplot(economy_melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
+  scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1), midpoint = 0, name = "Spearman\nCorrelation") +
+  geom_text(aes(Var2,Var1,label = value), color = "black",size = 4)+
+  geom_tile() + theme_clean() 
+
+# multiple linear regression model for immunization
+economy_lm <- lm(`Life expectancy` ~., data = expectancy_economy)
+summary(economy_lm)
+economy_lm1 <- lm(`Life expectancy` ~ `percentage expenditure` + GDP + `Income composition of resources`, data = expectancy_economy)
+summary(economy_lm1)
+# [economy_lm1], percentage expenditure, GDP, and income composition explains 79% of the variability in life expectancy
+backward_economy <- step(economy_lm, direction = "backward", scope = formula(economy_lm))
+economy_lm <- lm(`Life expectancy` ~ `percentage expenditure` + GDP + `Income composition of resources`, data = expectancy_economy)
+economy_lm
+summary(economy_lm)
+
+#check the residuals of the model
+economy_residual <-residuals(backward_economy)
+plot(economy_residual  ~ `Life expectancy`, data = expectancy_economy) 
+abline(h = 0)
+hist(economy_residual,bins = 5) #skewed to the right
+```
+
+# References
+Bezy, J. Marie. 2020.  Life expectancy. Encyclopedia Britannica. https://www.britannica.com/science/life-expectancy
+
+Murray, C.J., 1988. The infant mortality rate, life expectancy at birth, and a linear index of mortality as measures of general health status. International journal of epidemiology, 17(1), pp.122-128.
+
