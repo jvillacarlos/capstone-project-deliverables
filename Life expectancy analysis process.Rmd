@@ -1,6 +1,6 @@
 ---
 title: "Life Expectancy Analysis (Process)"
-author: "Krissa Joy L. Tabornal and Jan Ira Villacarlos"
+author: "Krissa Joy L. Tabornal and Jan Ira M. Villacarlos"
 date: "6/1/2021"
 output: pdf_document
 ---
@@ -9,11 +9,12 @@ output: pdf_document
 library(tidyverse)
 library(readr)
 library(ggplot2)
+library(reshape2)
 library(ggpubr)
 library(ggthemes)
 ```
 
-#Data Reminders
+# Data Reminders
 1. Project gathered data from 2000-2015 from 193 countries
 2. Must remove the missing data 
 3. N/A usually from less known countries like Vanuatu, Tonga, Togo, Cabo Verde, etc
@@ -34,7 +35,7 @@ library(ggthemes)
 11. What is the relationship of immunization and under five deaths?
 12. What is the relationship of thinness and under five deaths?
 
-#Final questions
+# Final questions
 1. What are the predicting factors that actually affects life expectancy? How did these factors change over the years?
 2. Should a country having lower life expectancy (>65) increase its healthcare expenditure to improve average lifespan?
 3. What is the influence of schooling or education on life expectancy?
@@ -42,7 +43,7 @@ library(ggthemes)
 5. Does economical factors and population affect life expectancy?
 6. Is there a difference between the life expectancy of developed and developing countries?
 
-#Information on the variables
+# Information on the variables
 1. country
 2. year
 3. status: developing or developed
@@ -110,8 +111,7 @@ life_cor <- life_expectancy %>%
 life_cor <- cor(life_cor, use = "na.or.complete", method = "spearman")
 life_cor
 
-library(GGally)
-ggpairs(life_cor)
+
 #almost all variables have high correlation coefficients, except for Hepatitis B and Population
 
 ```
@@ -349,15 +349,13 @@ shapiro.test(expectancy_status$life_expectancy)
 # kruskal-wallis test
 kruskal.test(expectancy_status$life_expectancy, expectancy_status$Status)
 
-<<<<<<< HEAD
+
 wilcox.test(`life_expectancy` ~ Status, data = expectancy_status, exact = FALSE)
 
-=======
 expectancy_status %>%
 group_by(Status) %>%
 summarize(Mean = mean(life_expectancy, na.rm=TRUE),
           Median = median(life_expectancy), Count = n())
->>>>>>> 5c631eaca9d866d2058a769b25adebc3b71d4fdb
 ```
 
 ```{r}
@@ -383,7 +381,7 @@ shapiro.test(mortality_health$`Total expenditure`)
 cor(health_spend, method = "spearman")
 #only small correlation between variables so unlikely causation 
 
-ggpairs(health_spend)
+
 #visualize relationships on expenditures and mortality to see if there is improvement in health sector
 
 health_lm1 <- lm(`Life expectancy` ~ `Total expenditure`, data = mortality_health)
@@ -410,9 +408,9 @@ summary(health_lm4) #only 1.70% explained
 #how did life expectancy change over the years
 
 #show  life expectancy in developed and developing countries over the years
-<<<<<<< HEAD
+
 ggplot(data = life_expectancy, aes(x = Status, y = `Life expectancy`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free") + theme_clean()
-=======
+
 ggplot(data = life_expectancy, aes(x = Status, y = `Life expectancy`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free")
 
 
@@ -425,7 +423,6 @@ mean_life <- life_expectancy %>%
 
 ggplot(data = mean_life, aes(x = Year, y = `mean`)) + geom_point() + geom_line() + ylab("Mean Life Expectancy")
 
->>>>>>> 6d53d6bd3c9b95f6b5798d501b91c3ec32237253
 #shows that life expectancy really improved over the years, still there is gap between the developed and developing countries 
 
 #remove all rows with NA
@@ -505,13 +502,5 @@ cor(ph_complete)
 #know which predictor variables are most important
 ph_lm <- lm(`Life expectancy` ~., data = ph_complete)
 summary(ph_lm)
-backward_ph <- step(ph_lm, direction = "backward", scope = formula(ph_lm))
-backward_ph
 ```
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 5a2b65122b4891e38b10a876487524271de481e9
 
