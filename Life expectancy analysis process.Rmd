@@ -393,7 +393,6 @@ summary(health_lm4) #only 1.70% explained
 #show  life expectancy in developed and developing countries over the years
 ggplot(data = life_expectancy, aes(x = Status, y = `Life expectancy`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free")
 
-ggplot(data = life_expectancy, aes(x = Year, y = `Life expectancy`)) + geom_point() + geom_line()
 
 mean_life <- life_expectancy %>%
                 select(Year, `Life expectancy`) %>%
