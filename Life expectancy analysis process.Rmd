@@ -395,6 +395,18 @@ summary(health_lm4) #only 1.70% explained
 
 #show  life expectancy in developed and developing countries over the years
 ggplot(data = life_expectancy, aes(x = Status, y = `Life expectancy`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free")
+
+ggplot(data = life_expectancy, aes(x = Year, y = `Life expectancy`)) + geom_point() + geom_line()
+
+mean_life <- life_expectancy %>%
+                select(Year, `Life expectancy`) %>%
+                filter(!is.na(`Life expectancy`)) %>%
+                group_by(Year) %>%
+                arrange(Year) %>%
+                summarise(mean = mean(`Life expectancy`))
+
+ggplot(data = mean_life, aes(x = Year, y = `mean`)) + geom_point() + geom_line() + ylab("Mean Life Expectancy")
+
 #shows that life expectancy really improved over the years, still there is gap between the developed and developing countries 
 
 #remove all rows with NA
@@ -453,6 +465,26 @@ life_residual <-residuals(backward_lifelm)
 plot(life_residual  ~ `Life expectancy`, data = life_complete) 
 abline(h = 0)
 hist(life_residual) #showing normality
+
+#analyzing specifically for Philippines
+
+ph <- life_expectancy %>%
+        filter(Country == "Philippines")
+
+#show Philippines life expectancy over the years 
+ggplot(data = ph, aes(x = Year, y = `Life expectancy`)) + geom_point() + geom_line() 
+
+#predictor variables for Philippine life expectancy
+#remove all rows with NA
+ph_complete <- ph %>%
+                  select(-Country, -Status,-Year) %>%
+                  drop_na()
+cor(ph_complete)
+#know which predictor variables are most important
+ph_lm <- lm(`Life expectancy` ~., data = ph_complete)
+summary(ph_lm)
+backward_ph <- step(ph_lm, direction = "backward", scope = formula(ph_lm))
+backward_ph
 ```
 
 <<<<<<< HEAD
