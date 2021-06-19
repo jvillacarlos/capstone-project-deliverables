@@ -9,7 +9,7 @@ In this repository, you can find the following materials:
 5. *.gitignore* - *ignore this*
 6. *.RData* - *ignore this*
 7. *.Rhistory* - *ignore this*
-8. *Life expectancy analysis process.Rmd* - this contains the flow of methods and analysis used in the project, can be ignored as it only shows the progress of the analysis while performing the project
+8. *Life expectancy analysis process.Rmd* - this contains the flow of methods and analysis used in the project, can be ignored as it only shows the progress of the analysis while performing the analysis
 9. *Life Expectancy Data.csv* - this contains the data used in the capstone project
 
 The project aims to answer the following questions: 
