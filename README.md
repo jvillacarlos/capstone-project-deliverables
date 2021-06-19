@@ -12,10 +12,11 @@ In this repository, you can find the following materials:
 8. *Life expectancy analysis process.Rmd* - this contains the flow of methods and analysis used in the project, can be ignored as it only shows the progress of the analysis while performing the project
 9. *Life Expectancy Data.csv* - this contains the data used in the capstone project
 
-In this project the following questions were asked: 
-1. What are the predicting factors that actually affects life expectancy? How did these factors change over the years?
-2. Should a country having lower life expectancy (>65) increase its healthcare expenditure to improve average lifespan?
-3. What is the influence of schooling or education on life expectancy?
+The project aims to answer the following questions: 
+1.What are the predicting factors that actually affect life expectancy? Has life expectancy improved over the years? Is there a difference between the life expectancy of developed countries and developing countries?
+2. How does healthcare expenditure influence average lifespan?
+3. How does schooling or education affect life expectancy?
 4. How does immunization affect life expectancy? What kind of immunizations have a greater influence?
-5. Does economical factors and population affect life expectancy?
-6. Is there a difference between the life expectancy of developed and developing countries?
+5. How do economic factors affect life expectancy? 
+
+

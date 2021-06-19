@@ -201,7 +201,7 @@ ggplot(data = social, aes(x = Status, y = `Schooling`)) + geom_boxplot() + stat_
 #shows that there is a difference in schooling years and life expectancy for developing and developed countries
 
 #determine if there is a correlation and causation between schooling and life expectancy
-cor.test(social$`Life expectancy`, social$Schooling)
+cor.test(social$`Life expectancy`, social$Schooling, method = "spearman")
 #indicates high correlation so can be modeled using linear regression 
 
 #visual the relationship using lm  
@@ -247,6 +247,10 @@ plot(expectancy_immunization)
 immunization_lm <- lm(`Life expectancy` ~., data = expectancy_immunization)
 summary(immunization_lm)
 backward_immunization <- step(immunization_lm, direction = "backward", scope = formula(immunization_lm))
+
+immune_lm <-lm(`Life expectancy` ~ Polio + Diphtheria, data = expectancy_immunization)
+immune_lm
+summary(immune_lm)
 # Only the immunization for Diphtheria and Polio shows a significant relationship with Life expectancy and it explains 16% of variability in life expectancy. 
 
 #check the residuals of the model
@@ -292,6 +296,9 @@ economy_lm1 <- lm(`Life expectancy` ~ `percentage expenditure` + GDP + `Income c
 summary(economy_lm1)
 # [economy_lm1], percentage expenditure, GDP, and income composition explains 79% of the variability in life expectancy
 backward_economy <- step(economy_lm, direction = "backward", scope = formula(economy_lm))
+economy_lm <- lm(`Life expectancy` ~ `percentage expenditure` + GDP + `Income composition of resources`, data = expectancy_economy)
+economy_lm
+summary(economy_lm)
 
 #check the residuals of the model
 economy_residual <-residuals(backward_economy)
@@ -342,6 +349,8 @@ shapiro.test(expectancy_status$life_expectancy)
 
 # kruskal-wallis test
 kruskal.test(expectancy_status$life_expectancy, expectancy_status$Status)
+
+wilcox.test(`life_expectancy` ~ Status, data = expectancy_status, exact = FALSE)
 
 ```
 
