@@ -27,6 +27,7 @@ library(ggplot2)
 library(ggpubr)
 library(ggthemes)
 library(GGally)
+library(reshape2)
 ```
 
 ### Checking data set structure
@@ -43,7 +44,7 @@ dim(life_expectancy)
 ```
 
 # Data Analysis
-Life expectancy was the main outcome of this analysis. The aforementioned predictor variables were used to answer the research questions. The tidyverse was the main package used in the analysis. First, the data was first examined using head(), names(), str(), dim(), and summary(). The summary results showed that there were missing values in some variables. The developing and developed countries were also counted from 2000-2015. Preliminary visualization using geom_count() was performed to get a glimpse of the range of life expectancy for each year and differentiate data values from developed and developing countries. Correlation test was also conducted using cor() and ggpairs() to know which variables are good candidates in predicting life expectancy.  
+Life expectancy was the main outcome of this analysis. The aforementioned predictor variables were used to answer the research questions. The tidyverse was the main package used in the analysis. First, the data was first examined using head(), names(), str(), dim(), and summary(). The summary results showed that there were missing values in some variables. The developing and developed countries were also counted from 2000-2015. Preliminary visualization using geom_count() was performed to get a glimpse of the range of life expectancy for each year and differentiate data values from developed and developing countries. Correlation test was also conducted using cor() to know which variables are good candidates in predicting life expectancy.  
 
 ####Checking general visualizations of the data
 ```{r}
@@ -77,7 +78,6 @@ life_cor <- life_expectancy %>%
 life_cor <- cor(life_cor, use = "na.or.complete", method = "spearman")
 life_cor
 
-ggpairs(life_cor)
 #almost all variables have high correlation coefficients, except for Hepatitis B and Population
 ```
 

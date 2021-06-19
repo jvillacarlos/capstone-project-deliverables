@@ -112,7 +112,7 @@ life_cor
 
 library(GGally)
 ggpairs(life_cor)
-#almost all variables have high correlation coefficients, except for Hepatitis B and Population. 
+#almost all variables have high correlation coefficients, except for Hepatitis B and Population
 
 ```
 
@@ -366,10 +366,13 @@ summarize(Mean = mean(life_expectancy, na.rm=TRUE),
 
 #show distribution of total expenditure in developed and developing countries over the years
 ggplot(data = mortality_health, aes(x = Status, y = `Total expenditure`)) + geom_boxplot()  + stat_summary(fun = mean, geom = "point", size = 2, color = "red") + facet_wrap(.~Year, scales = "free")
+#shows no data available for developed countries in 2015
 
+#remove data values in 2015
 mortality_health <- mortality_health %>%
                     filter(Year != 2015)
 
+#make df for easy correlation , so remove nonnumerical variables
 health_spend <- mortality_health %>%
                   select(-Year, -Status, -Country) 
 
@@ -383,6 +386,9 @@ cor(health_spend, method = "spearman")
 ggpairs(health_spend)
 #visualize relationships on expenditures and mortality to see if there is improvement in health sector
 
+health_lm1 <- lm(`Life expectancy` ~ `Total expenditure`, data = mortality_health)
+summary(health_lm1) #only 4.77% explained 
+
 ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Life expectancy`, color = Status)) + geom_point() + theme_clean()
 
 ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `Adult Mortality`, color = Status)) + geom_point() + theme_clean()
@@ -391,8 +397,6 @@ ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `infant deaths`
 
 ggplot(data = mortality_health, aes(x = `Total expenditure`, y = `under-five deaths`, color = Status)) + geom_point()
 
-health_lm1 <- lm(`Life expectancy` ~ `Total expenditure`, data = mortality_health)
-summary(health_lm1) #only 4.77% explained 
 health_lm2 <- lm(`Adult Mortality` ~ `Total expenditure`, data = mortality_health)
 summary(health_lm2)  #only 1.37% explained
 health_lm3 <- lm(`infant deaths` ~ `Total expenditure`, data = mortality_health)
@@ -433,6 +437,9 @@ dim(life_complete)
 
 #know which predictor variables are most important
 life_lm <- lm(`Life expectancy` ~., data = life_complete)
+summary(life_lm) #check variables with lowest p values
+
+#perform backward regression
 backward_life <- step(life_lm, direction = "backward", scope = formula(life_lm))
 backward_life
 
@@ -442,8 +449,8 @@ backward_lifelm <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` +
     `Total expenditure` + Diphtheria + `HIV/AIDS` + `thinness 5-9 years` + 
     `Income composition of resources` + Schooling, data = life_complete)
 
-backward_lifelm
-summary(backward_lifelm)
+backward_lifelm #use to find equation
+summary(backward_lifelm) #used to find adjusted R squared, residual standard error, and median error
 
 #trying to increase adjusted R2 by removing those with low p values
 backward_lifelm1 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` + 
@@ -467,15 +474,15 @@ backward_lifelm3 <- lm(`Life expectancy` ~ `Adult Mortality` + `infant deaths` +
 backward_lifelm3
 summary(backward_lifelm3)
 
-summary(life_lm) #check for the final predictor equation
+#compare AIC values
 AIC(backward_lifelm)
 AIC(backward_lifelm1)
 AIC(backward_lifelm2)
 AIC(backward_lifelm3)
 
-#best model is the model found using the backward regression
+#best model is the model found using the backward regression, has the lowest AIC
 
-#check the residuals of the model
+#check the residuals of the best model
 life_residual <-residuals(backward_lifelm)
 plot(life_residual  ~ `Life expectancy`, data = life_complete) 
 abline(h = 0)
