@@ -10,6 +10,7 @@ library(tidyverse)
 library(readr)
 library(ggplot2)
 library(ggpubr)
+library(ggthemes)
 ```
 
 #Data Reminders
@@ -237,6 +238,7 @@ head(immunization_melted_cormat)
 # plotting melted cormat
 ggplot(immunization_melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
   scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1), midpoint = 0, name = "Spearman\nCorrelation") +
+  geom_text(aes(Var2,Var1,label = value), color = "black",size = 4) +
   geom_tile() + theme_clean()
 
 # multiple linear regression model for immunization
@@ -257,7 +259,8 @@ hist(immunization_residual) #showing normality
 ```{r}
 # for question 5
 ## Does economical factors and population affect life expectancy? 
-# Economical factors except for Total expenditure affect life expectancy. While population does not affect life expectancy at all.
+# Economical factors except for Total expenditure affect life expectancy.
+# Population also affects life expectancy.
 
 # df for life expectancy and economical factors
 expectancy_economy <- economical %>%
@@ -278,8 +281,7 @@ head(economy_melted_cormat)
 
 # plotting melted cormat
 ggplot(economy_melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
-  scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1),
-                       midpoint = 0, name = "Spearman\nCorrelation") +
+  scale_fill_gradient2(low = 'red', mid = 'yellow', high = 'green', limit = c(-1,1), midpoint = 0, name = "Spearman\nCorrelation") +
   geom_text(aes(Var2,Var1,label = value), color = "black",size = 4)+
   geom_tile() + theme_clean() 
 
@@ -295,7 +297,23 @@ backward_economy <- step(economy_lm, direction = "backward", scope = formula(eco
 economy_residual <-residuals(backward_economy)
 plot(economy_residual  ~ `Life expectancy`, data = expectancy_economy) 
 abline(h = 0)
-hist(economy_residual) #skewed to the right
+hist(economy_residual,bins = 5) #skewed to the right
+```
+
+```{r}
+# for question 5
+
+# df for expectancy and population
+expectancy_population <- life_expectancy %>%
+  select(`Life expectancy`, Population)
+
+#determine if there is a correlation schooling and life expectancy
+cor.test(expectancy_population$`Life expectancy`, expectancy_population$Population,
+         method = "spearman")
+# very low correlation, 9%
+
+# scatter plot for expectancy and population
+ggplot(data = expectancy_population, aes(x = Population, y = `Life expectancy`)) + geom_point() + theme_classic()
 ```
 
 ```{r}
@@ -324,27 +342,6 @@ shapiro.test(expectancy_status$life_expectancy)
 
 # kruskal-wallis test
 kruskal.test(expectancy_status$life_expectancy, expectancy_status$Status)
-
-```
-
-```{r}
-# for question 5
-
-# df for expectancy and population
-expectancy_population <- life_expectancy %>%
-  select(`Life expectancy`, Population)
-
-#determine if there is a correlation schooling and life expectancy
-cor.test(expectancy_population$`Life expectancy`, expectancy_population$Population,
-         method = "spearman")
-# very low correlation, 9%
-
-# scatter plot for expectancy and population
-ggplot(data = expectancy_population, aes(x = Population, y = `Life expectancy`)) + geom_point() + theme_classic()
-```
-
-```{r}
-# question 6
 
 ```
 
